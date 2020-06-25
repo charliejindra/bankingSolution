@@ -1,4 +1,5 @@
 ﻿using bankingDomain;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,15 +10,20 @@ namespace bankingTests
     public class bankAcctOverdrafts
     {
 
+        private decimal _openingBalance;
+        private BankAccount _account;
+        public bankAcctOverdrafts()
+        {
+            _account = new BankAccount(new Mock<ICalculateBonuses>().Object, new Mock<INarcOnAccounts>().Object);
+            _openingBalance = _account.getBalance();
+        }
+
         [Fact]
         public void overdraftDoesNotDecreaseBalance()
         {
-            var account = new BankAccount();
-            var openingBalance = account.getBalance();
-
             try
             {
-                account.Withdraw(openingBalance + 1);
+                _account.Withdraw(_openingBalance + 1);
             }
             catch (InsufficientFundsException)
             {
@@ -25,16 +31,13 @@ namespace bankingTests
                 // swallow the exception
             }
 
-            Assert.Equal(openingBalance, account.getBalance());
+            Assert.Equal(_openingBalance, _account.getBalance());
         }
 
         [Fact]
         public void overdraftThrowsException()
         {
-            var account = new BankAccount();
-            var openingBalance = account.getBalance();
-
-            Assert.Throws<InsufficientFundsException>(() => account.Withdraw(openingBalance + 1));
+            Assert.Throws<InsufficientFundsException>(() => _account.Withdraw(_openingBalance + 1));
         }
 
     }

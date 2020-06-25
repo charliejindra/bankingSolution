@@ -1,6 +1,8 @@
 ﻿using bankingDomain;
+using Moq;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Text;
 using Xunit;
 
@@ -8,23 +10,33 @@ namespace bankingTests
 {
     public class BankAccountWithdrawal
     {
-        [Fact]
-        public void WithdrawingMoneyDecreasesTheBalance()
+
+        private BankAccount _account;
+        private decimal _openingBalance;
+
+        public BankAccountWithdrawal()
         {
-            var account = new BankAccount();
-            var openingBalance = account.getBalance();
-            var withdrawalAmount = 300M;
+            _account = new BankAccount(new dummyBonusCalculator(), new Mock<INarcOnAccounts>().Object);
+            _openingBalance = _account.getBalance();
+        }
 
-            account.Withdraw(withdrawalAmount);
+        [Theory]
+        [InlineData(1)]
+        [InlineData(100)]
+        public void WithdrawingMoneyDecreasesTheBalance(decimal withdrawalAmount)
+        {
+            
 
-            var expectedBalance = openingBalance - withdrawalAmount;
-            Assert.Equal(expectedBalance, account.getBalance());
+            _account.Withdraw(withdrawalAmount);
+
+            var expectedBalance = _openingBalance - withdrawalAmount;
+            Assert.Equal(expectedBalance, _account.getBalance());
         }
 
         [Fact]
         public void youCanTakeAllYourMoney()
         {
-            var account = new BankAccount();
+            var account = new BankAccount(new dummyBonusCalculator(), new Mock<INarcOnAccounts>().Object);
             var openingBalance = account.getBalance();
 
             account.Withdraw(openingBalance);

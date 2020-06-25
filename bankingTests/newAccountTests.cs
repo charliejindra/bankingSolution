@@ -1,4 +1,5 @@
 ﻿using bankingDomain;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,7 +12,7 @@ namespace bankingTests
         [Fact]
         public void newAccountsHaveCorrectBalance()
         {
-            var account = new BankAccount();
+            var account = new BankAccount(new dummyBonusCalculator(), new Mock<INarcOnAccounts>().Object);
             decimal balance = account.getBalance();
             Assert.Equal(5000M, balance);
         }

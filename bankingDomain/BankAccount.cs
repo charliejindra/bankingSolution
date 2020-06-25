@@ -5,11 +5,14 @@ namespace bankingDomain
     public class BankAccount
     {
 
+        private ICalculateBonuses _bonusCalculator;
         private decimal _currentBalance = 5000;
+        private INarcOnAccounts _feds;
 
-        public BankAccount()
+        public BankAccount(ICalculateBonuses bonusCalculator, INarcOnAccounts feds)
         {
-
+            _bonusCalculator = bonusCalculator;
+            _feds = feds;
         }
 
         public decimal getBalance()
@@ -17,16 +20,19 @@ namespace bankingDomain
             return _currentBalance;
         }
 
-        public void Deposit(decimal amountToDeposit)
+        public virtual void Deposit(decimal amountToDeposit)
         {
-            this._currentBalance += amountToDeposit;
+            decimal amtOfBonus = _bonusCalculator.GetDepositBonusFor(amountToDeposit, _currentBalance);
+
+            this._currentBalance += amountToDeposit + amtOfBonus;
         }
 
         public void Withdraw(decimal withdrawalAmount)
         {
             if(withdrawalAmount <= _currentBalance)
             {
-                this._currentBalance -= withdrawalAmount;
+                _feds.NotifyOfWithdrawal(this, withdrawalAmount);
+                _currentBalance -= withdrawalAmount;
             }
             else
             {
